@@ -11,6 +11,9 @@
 
 ![image](https://github.com/user-attachments/assets/116ced74-6e76-4150-bcdf-a907511a7727)
 
+## Automated Testing
+![image](https://github.com/user-attachments/assets/8928e3a0-83a2-4463-8939-d140a5d99d3d)
+
 
 ## Slicer Coverage & Testing
 | ------------- | File Metadata | Slicer Metadata | Filament Metadata | Job ETA | Thumbnail | Tested |
