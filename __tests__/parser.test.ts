@@ -5,6 +5,7 @@ import * as fs from 'fs';
 // --- Test Configuration ---
 const fixturesDir = path.join(__dirname, 'fixtures');
 const gcodeFilePath = path.join(fixturesDir, 'test.gcode');
+const orcaGcodeFilePath = path.join(fixturesDir, 'regular_orca_test.gcode');
 const threeMfFilePath = path.join(fixturesDir, 'test.3mf');
 const nonExistentFilePath = path.join(fixturesDir, 'nonexistent.file');
 const unsupportedFilePath = path.join(fixturesDir, 'test.txt');
@@ -149,12 +150,68 @@ describe('Slicer File Parser', () => {
             expect(file?.filamentUsedG).toEqual(3.64);
         });
 
-        it('should parse the embedded thumbnail', () => {
+        it('should detect & parse the embedded thumbnail', () => {
             const file = threeMfResult.file;
             expect(file).toBeDefined();
             expect(file?.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
         })
 
+    });
+
+    describe('Standard OrcaSlicer Parsing', () => {
+        let orcaGcodeResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
+
+        // Use beforeAll to parse once per describe block
+        beforeAll(async () => {
+            orcaGcodeResult = await parseSlicerFile(orcaGcodeFilePath);
+        });
+
+        it('should parse the file without error', () => {
+            // beforeAll handles the parsing, just check if result exists
+            expect(orcaGcodeResult).toBeDefined();
+        });
+
+        it('should work with parseSlicerFile', () => {
+            expect(orcaGcodeResult).toHaveProperty('slicer');
+            expect(orcaGcodeResult).toHaveProperty('file');
+            expect(orcaGcodeResult).toHaveProperty('threeMf');
+            expect(orcaGcodeResult.threeMf).toBeNull();
+            expect(orcaGcodeResult.slicer).toBeDefined();
+            expect(orcaGcodeResult.file).toBeDefined();
+        });
+
+        it('should parse slicer metadata', () => {
+            const slicer = orcaGcodeResult.slicer;
+            expect(slicer).toBeDefined();
+
+            // values from regular_orca_test.gcode
+            expect(slicer?.slicer).toBe(SlicerType.OrcaFF);
+            expect(slicer?.slicerName).toEqual('OrcaSlicer');
+            expect(slicer?.slicerVersion).toBeDefined();
+            expect(slicer?.sliceDate).toBeDefined();
+            expect(slicer?.sliceTime).toBeDefined();
+            expect(slicer?.printEta).toBeDefined();
+        });
+
+        it('should parse file metadata', () => {
+            const file = orcaGcodeResult.file;
+            expect(file).toBeDefined();
+
+            expect(file?.sliceSoft).toBe(SlicerType.OrcaFF);
+            expect(file?.printerModel).toBeDefined();
+            expect(file?.filamentType).toBeDefined();
+            expect(typeof file?.filamentUsedMM).toBe('number');
+            expect(typeof file?.filamentUsedG).toBe('number');
+        });
+
+        it('should detect and extract thumbnail', () => {
+            const file = orcaGcodeResult.file;
+            expect(file).toBeDefined();
+            // Thumbnail might or might not be present, but if it exists it should be a data URI
+            if (file?.thumbnail) {
+                expect(file.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
+            }
+        });
     });
 
     describe('Error Handling', () => {
