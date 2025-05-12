@@ -1,5 +1,5 @@
 {
-  "name": "slicer-meta",
+  "name": "@parallel-7/slicer-meta",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -22,5 +22,12 @@
     "ts-jest": "^29.3.2",
     "typescript": "^5.5.3"
   },
-  "private": true
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Parallel-7/slicer-meta.git"
+  },
+  "private": false
 }
