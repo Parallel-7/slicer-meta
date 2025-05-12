@@ -36,8 +36,14 @@ jobs:
           VERSION=${TAG#v}
           npm version $VERSION --no-git-tag-version
       
+      - name: Set up package visibility
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+          echo "@parallel-7:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "always-auth=true" >> ~/.npmrc
+      
       - name: Publish to GitHub Packages
-        run: npm publish
+        run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
