@@ -11,6 +11,11 @@
 
 ![image](https://github.com/user-attachments/assets/116ced74-6e76-4150-bcdf-a907511a7727)
 
+- GX File (Converted)
+
+![image](https://github.com/user-attachments/assets/195405b9-1369-4f20-a4bf-ead6154b8d1b)
+
+
 ## Automated Testing
 ![image](https://github.com/user-attachments/assets/8928e3a0-83a2-4463-8939-d140a5d99d3d)
 
@@ -21,3 +26,4 @@
 | Orca-FlashForge  | Yes  | Yes  | Yes | Yes | Yes | Yes |
 | OrcaSlicer  | Yes  | Yes  | Yes | Yes | Yes | Yes |
 | FlashPrint  | Limited  | Yes  | Only Material Type | N/A | N/A | Yes |
+| GX (Converted)  | Limited  | Yes  | Only Material Type | Yes | Yes | Yes |
