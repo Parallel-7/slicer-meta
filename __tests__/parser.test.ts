@@ -6,6 +6,7 @@ import * as fs from 'fs';
 const fixturesDir = path.join(__dirname, 'fixtures');
 const gcodeFilePath = path.join(fixturesDir, 'test.gcode');
 const orcaGcodeFilePath = path.join(fixturesDir, 'regular_orca_test.gcode');
+const legacyGxFilePath = path.join(fixturesDir, 'legacy.gx');
 const threeMfFilePath = path.join(fixturesDir, 'test.3mf');
 const nonExistentFilePath = path.join(fixturesDir, 'nonexistent.file');
 const unsupportedFilePath = path.join(fixturesDir, 'test.txt');
@@ -77,6 +78,57 @@ describe('Slicer File Parser', () => {
             // flashprint doesn't report this information
             expect(file?.filamentUsedMM).toEqual(0);
             expect(file?.filamentUsedG).toEqual(0);
+        });
+    });
+
+    describe('Legacy GX Parsing (legacy.gx)', () => {
+        let gxResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
+
+        // Use beforeAll to parse once per describe block
+        beforeAll(async () => {
+            gxResult = await parseSlicerFile(legacyGxFilePath);
+        });
+
+        it('should parse the file without error', () => {
+            // beforeAll handles the parsing, just check if result exists
+            expect(gxResult).toBeDefined();
+        });
+
+        it('should work with parseSlicerFile', () => {
+            expect(gxResult).toHaveProperty('slicer');
+            expect(gxResult).toHaveProperty('file');
+            expect(gxResult).toHaveProperty('threeMf');
+            expect(gxResult.threeMf).toBeNull();
+            expect(gxResult.slicer).toBeDefined();
+            expect(gxResult.file).toBeDefined();
+        });
+
+        it('should parse slicer metadata', () => {
+            const slicer = gxResult.slicer;
+            expect(slicer).toBeDefined();
+
+            // values from legacy.gx
+            expect(slicer?.slicer).toBe(SlicerType.LegacyGX);
+            expect(slicer?.slicerName).toEqual('OrcaSlicer');
+            expect(slicer?.slicerVersion).toEqual('2.3.1-dev');
+            expect(slicer?.sliceDate).toEqual('2025-05-12');
+            expect(slicer?.sliceTime).not.toEqual('Error');
+            expect(slicer?.printEta).toEqual('3h25m34s');
+        });
+
+        it('should parse file metadata', () => {
+            const file = gxResult.file;
+            expect(file).toBeDefined();
+
+            expect(file?.sliceSoft).toBe(SlicerType.LegacyGX);
+            expect(file?.filamentType).toEqual('PLA');
+            expect(file?.filamentUsedMM).toEqual(13440.11);
+            expect(file?.filamentUsedG).toEqual(40.09);
+            expect(file?.printerModel).toEqual('Flashforge Adventurer 4 Series');
+            
+            // Check thumbnail extraction
+            expect(file?.thumbnail).toBeDefined();
+            expect(file?.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
         });
     });
 

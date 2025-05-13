@@ -14,6 +14,7 @@ export type { FilamentInfo } from './FilamentInfo';
 export { GCodeParser } from './parser/gcode/GCodeParser';
 export { FlashPrintParser } from './parser/gcode/FlashPrintParser';
 export { OrcaFlashForgeParser } from './parser/gcode/OrcaFlashForgeParser';
+export { LegacyGXParser } from './parser/gcode/LegacyGXParser';
 export { ThreeMfParser } from './parser/threemf/ThreeMfParser';
 
 
@@ -51,7 +52,7 @@ export async function parseSlicerFile(filePath: string): Promise<ParseResult> {
                 plateImage: parser.plateImage,
             }
         };
-    } else if (ext === '.gcode' || ext === '.g') {
+    } else if (ext === '.gcode' || ext === '.g' || ext === '.gx') {
         const parser = new GCodeParser();
         await parser.parse(filePath);
         return {
