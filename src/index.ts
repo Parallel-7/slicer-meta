@@ -14,7 +14,7 @@ export type { FilamentInfo } from './FilamentInfo';
 export { GCodeParser } from './parser/gcode/GCodeParser';
 export { FlashPrintParser } from './parser/gcode/FlashPrintParser';
 export { OrcaFlashForgeParser } from './parser/gcode/OrcaFlashForgeParser';
-export { LegacyGXParser } from './parser/gcode/LegacyGXParser';
+export { GXParser } from './parser/gcode/GXParser';
 export { ThreeMfParser } from './parser/threemf/ThreeMfParser';
 
 

@@ -5,7 +5,7 @@ import { SlicerFileMeta } from '../../SlicerFileMeta';
 import { SlicerType } from '../../SlicerType';
 import { FlashPrintParser } from './FlashPrintParser';
 import { OrcaFlashForgeParser } from './OrcaFlashForgeParser';
-import { LegacyGXParser } from './LegacyGXParser';
+import { GXParser } from './GXParser';
 
 /**
  * AIO GCode Parser
@@ -54,7 +54,7 @@ export class GCodeParser {
                     this.fileInfo = result.fileMeta;
                     break;
                 case SlicerType.LegacyGX:
-                    result = LegacyGXParser.parse(filePath);
+                    result = GXParser.parse(filePath);
                     this.slicerInfo = result.slicerMeta;
                     this.fileInfo = result.fileMeta;
                     break;
@@ -95,7 +95,7 @@ export class GCodeParser {
                     this.fileInfo = result.fileMeta;
                     break;
                 case SlicerType.LegacyGX:
-                    result = LegacyGXParser.parseFromContent(content);
+                    result = GXParser.parseFromContent(content);
                     this.slicerInfo = result.slicerMeta;
                     this.fileInfo = result.fileMeta;
                     break;

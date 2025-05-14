@@ -6,8 +6,9 @@ import * as fs from 'fs';
 const fixturesDir = path.join(__dirname, 'fixtures');
 const gcodeFilePath = path.join(fixturesDir, 'test.gcode');
 const orcaGcodeFilePath = path.join(fixturesDir, 'regular_orca_test.gcode');
-const legacyGxFilePath = path.join(fixturesDir, 'legacy.gx');
-const threeMfFilePath = path.join(fixturesDir, 'test.3mf');
+const convertedGxFilePath = path.join(fixturesDir, 'converted.gx');
+const flashPrintGxFilePath = path.join(fixturesDir, 'FlashPrint.gx');
+const orcaFFthreeMfFilePath = path.join(fixturesDir, 'orca-flashforge.3mf');
 const nonExistentFilePath = path.join(fixturesDir, 'nonexistent.file');
 const unsupportedFilePath = path.join(fixturesDir, 'test.txt');
 
@@ -25,7 +26,7 @@ describe('Slicer File Parser', () => {
     // Increase timeout slightly for parsing complex files if needed
     // jest.setTimeout(10000);
 
-    describe('G-Code Parsing (test.gcode)', () => {
+    describe('FlashPrint G-Code Parsing (test.gcode)', () => {
         let gcodeResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
 
         // Use beforeAll to parse once per describe block
@@ -81,12 +82,12 @@ describe('Slicer File Parser', () => {
         });
     });
 
-    describe('Legacy GX Parsing (legacy.gx)', () => {
+    describe('FlashPrint Converted GX Parsing (converted.gx)', () => {
         let gxResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
 
         // Use beforeAll to parse once per describe block
         beforeAll(async () => {
-            gxResult = await parseSlicerFile(legacyGxFilePath);
+            gxResult = await parseSlicerFile(convertedGxFilePath);
         });
 
         it('should parse the file without error', () => {
@@ -107,7 +108,6 @@ describe('Slicer File Parser', () => {
             const slicer = gxResult.slicer;
             expect(slicer).toBeDefined();
 
-            // values from legacy.gx
             expect(slicer?.slicer).toBe(SlicerType.LegacyGX);
             expect(slicer?.slicerName).toEqual('OrcaSlicer');
             expect(slicer?.slicerVersion).toEqual('2.3.1-dev');
@@ -132,12 +132,60 @@ describe('Slicer File Parser', () => {
         });
     });
 
-    describe('3MF Parsing (test.3mf)', () => {
+    describe('Standard FlashPrint GX Parsing (FlashPrint.gx)', () => {
+        let flashprintGxResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
+
+        // Use beforeAll to parse once per describe block
+        beforeAll(async () => {
+            flashprintGxResult = await parseSlicerFile(flashPrintGxFilePath);
+        });
+
+        it('should parse the file without error', () => {
+            expect(flashprintGxResult).toBeDefined();
+        });
+
+        it('should work with parseSlicerFile', () => {
+            expect(flashprintGxResult).toHaveProperty('slicer');
+            expect(flashprintGxResult).toHaveProperty('file');
+            expect(flashprintGxResult).toHaveProperty('threeMf');
+            expect(flashprintGxResult.threeMf).toBeNull();
+            expect(flashprintGxResult.slicer).toBeDefined();
+            expect(flashprintGxResult.file).toBeDefined();
+        });
+
+        it('should parse slicer metadata', () => {
+            const slicer = flashprintGxResult.slicer;
+            expect(slicer).toBeDefined();
+
+            // Test for values from the generator line in the FlashPrint GX format
+            expect(slicer?.slicer).toBe(SlicerType.LegacyGX);
+            expect(slicer?.slicerName).toEqual('ffslicer');
+            expect(slicer?.slicerVersion).toEqual('2.4.4');
+            expect(slicer?.sliceDate).toEqual('05/13/25');
+            expect(slicer?.sliceTime).not.toEqual('Error');
+        });
+
+        it('should parse file metadata', () => {
+            const file = flashprintGxResult.file;
+            expect(file).toBeDefined();
+
+            // Only test for values we know are available from the file
+            expect(file?.sliceSoft).toBe(SlicerType.LegacyGX);
+            expect(file?.filamentType).toEqual('PLA');
+            expect(file?.printerModel).toEqual('Adventurer 4 Series');
+            
+            // Check thumbnail extraction
+            expect(file?.thumbnail).toBeDefined();
+            expect(file?.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
+        });
+    });
+
+    describe('Orca-FlashForge 3MF Parsing (orca-flashforge.3mf)', () => {
         let threeMfResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result
 
         beforeAll(async () => {
             // 3MF parsing within parseSlicerFile is sync *after* file read, but await the promise
-            threeMfResult = await parseSlicerFile(threeMfFilePath);
+            threeMfResult = await parseSlicerFile(orcaFFthreeMfFilePath);
         });
 
         it('should parse the file without error', () => {
@@ -155,7 +203,7 @@ describe('Slicer File Parser', () => {
             const threeMf = threeMfResult.threeMf;
             expect(threeMf).toBeDefined();
 
-            // values from test.3mf
+            // values from orca-flashforge.3mf
             expect(threeMf?.printerModelId).toEqual('Flashforge-Adventurer-5M-Pro');
             expect(threeMf?.supportUsed).toEqual(false);
             expect(threeMf?.fileNames).toEqual(['SunluHSOrange.stl']);
@@ -210,7 +258,7 @@ describe('Slicer File Parser', () => {
 
     });
 
-    describe('Standard OrcaSlicer Parsing', () => {
+    describe('Standard OrcaSlicer Parsing (regular_orca_test.gcode)', () => {
         let orcaGcodeResult: Awaited<ReturnType<typeof parseSlicerFile>>; // Store result for logging
 
         // Use beforeAll to parse once per describe block
