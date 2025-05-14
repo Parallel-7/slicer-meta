@@ -25,5 +25,6 @@
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Orca-FlashForge  | Yes  | Yes  | Yes | Yes | Yes | Yes |
 | OrcaSlicer  | Yes  | Yes  | Yes | Yes | Yes | Yes |
-| FlashPrint  | Limited  | Yes  | Only Material Type | N/A | N/A | Yes |
-| GX (Converted)  | Limited  | Yes  | Only Material Type | Yes | Yes | Yes |
+| FlashPrint (G-Code)  | Limited  | Yes  | Only Material Type | N/A | N/A | Yes |
+| FlashPrint GX (Converted)  | Limited  | Yes  | Only Material Type | Yes | Yes | Yes |
+| FlashPrint GX (Standard)  | Limited  | Yes  | Only Material Type | Yes | Yes | Yes |
