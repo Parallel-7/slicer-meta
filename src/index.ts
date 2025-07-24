@@ -17,8 +17,7 @@ export { OrcaFlashForgeParser } from './parser/gcode/OrcaFlashForgeParser';
 export { GXParser } from './parser/gcode/GXParser';
 export { ThreeMfParser } from './parser/threemf/ThreeMfParser';
 
-
-interface ParseResult {
+export interface ParseResult {
     slicer?: SlicerMeta | null;
     file?: SlicerFileMeta | null;
     threeMf?: {
