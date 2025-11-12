@@ -126,7 +126,7 @@ export class OrcaFlashForgeParser {
                         id: i.toString(),
                         type: filamentTypeArray[i],
                         color: filamentColorArray[i] || null,
-                        usedM: usedMM.toFixed(2),
+                        usedM: (usedMM / 1000).toFixed(2),  // Convert mm to meters
                         usedG: usedG.toFixed(2)
                     });
                     usedTypes.push(filamentTypeArray[i]);
