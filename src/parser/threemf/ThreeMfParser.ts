@@ -133,15 +133,21 @@ export class ThreeMfParser {
                     this.printerModelId = this.fileInfo?.printerModel ?? "Unknown";
                 }
 
-                // Create default filament info if not provided
-                if (this.filaments.length === 0 && this.fileInfo?.filamentType !== "Unknown") {
-                    this.filaments.push({
-                        id: "0", // Assign a default ID
-                        type: this.fileInfo?.filamentType,
-                        color: "Unknown", // G-code usually doesn't store color
-                        usedM: this.fileInfo?.filamentUsedMM?.toString(),
-                        usedG: this.fileInfo?.filamentUsedG?.toString(),
-                    });
+                // Create default filament info if not provided by slice_info
+                if (this.filaments.length === 0 && this.fileInfo) {
+                    // Prefer detailed filaments array from G-code parser (if available)
+                    if (this.fileInfo.filaments && this.fileInfo.filaments.length > 0) {
+                        this.filaments = this.fileInfo.filaments;
+                    } else if (this.fileInfo.filamentType !== "Unknown") {
+                        // Fallback to old string format
+                        this.filaments.push({
+                            id: "0", // Assign a default ID
+                            type: this.fileInfo.filamentType,
+                            color: "Unknown", // G-code usually doesn't store color
+                            usedM: this.fileInfo.filamentUsedMM?.toString(),
+                            usedG: this.fileInfo.filamentUsedG?.toString(),
+                        });
+                    }
                 }
             // catch any parsing errors
             } catch (error: any) {

@@ -53,6 +53,12 @@ export class OrcaFlashForgeParser {
         let inConfigBlock = false;
         let thumbnailDataBase64 = '';
 
+        // Temporary storage for parallel arrays to correlate filament data
+        let filamentTypeArray: string[] = [];
+        let filamentUsedMMArray: number[] = [];
+        let filamentUsedGArray: number[] = [];
+        let filamentColorArray: string[] = [];
+
         const lines = contentString.split(/\r?\n/);
 
         for (const rawLine of lines) {
@@ -92,10 +98,10 @@ export class OrcaFlashForgeParser {
                     thumbnailDataBase64 += base64Line;
                 }
             } else if (inConfigBlock) {
-                OrcaFlashForgeParser.parseConfigLine(line, fileMeta);
+                OrcaFlashForgeParser.parseConfigLine(line, fileMeta, filamentTypeArray, filamentColorArray);
             } else if (line.startsWith(';')) {
                 // Process general comments outside specific blocks (like ETA, filament usage)
-                OrcaFlashForgeParser.parseAdditionalData(line, fileMeta, slicerMeta);
+                OrcaFlashForgeParser.parseAdditionalData(line, fileMeta, slicerMeta, filamentUsedMMArray, filamentUsedGArray);
             }
         } // End of line loop
 
@@ -105,6 +111,36 @@ export class OrcaFlashForgeParser {
             OrcaFlashForgeParser.processThumbnailData(thumbnailDataBase64, fileMeta);
         }
 
+        // Post-process filament data: correlate parallel arrays and filter unused filaments
+        if (filamentTypeArray.length > 0) {
+            const filaments: any[] = [];
+            const usedTypes: string[] = [];
+
+            for (let i = 0; i < filamentTypeArray.length; i++) {
+                const usedMM = filamentUsedMMArray[i] || 0;
+                const usedG = filamentUsedGArray[i] || 0;
+
+                // Only include filaments that are actually used (non-zero usage)
+                if (usedMM > 0 || usedG > 0) {
+                    filaments.push({
+                        id: i.toString(),
+                        type: filamentTypeArray[i],
+                        color: filamentColorArray[i] || null,
+                        usedM: usedMM.toFixed(2),
+                        usedG: usedG.toFixed(2)
+                    });
+                    usedTypes.push(filamentTypeArray[i]);
+                }
+            }
+
+            // Set the detailed filaments array
+            fileMeta.filaments = filaments;
+
+            // Update filamentType string to only show used filaments
+            fileMeta.filamentType = usedTypes.length > 0
+                ? usedTypes.join(';')
+                : "Unknown";
+        }
 
         return { slicerMeta, fileMeta };
     }
@@ -130,8 +166,15 @@ export class OrcaFlashForgeParser {
      * Parses a line within the CONFIG_BLOCK.
      * @param line The comment line.
      * @param fileMeta The SlicerFileMeta object.
+     * @param filamentTypeArray Array to store filament types.
+     * @param filamentColorArray Array to store filament colors.
      */
-    private static parseConfigLine(line: string, fileMeta: SlicerFileMeta): void {
+    private static parseConfigLine(
+        line: string,
+        fileMeta: SlicerFileMeta,
+        filamentTypeArray: string[],
+        filamentColorArray: string[]
+    ): void {
         const cleanedLine = line.replace(/^;\s*/, '').trim();
         const equalsIndex = cleanedLine.indexOf('=');
 
@@ -141,15 +184,39 @@ export class OrcaFlashForgeParser {
 
             switch (key) {
                 case 'filament_type':
-                    if (value.startsWith('[') && value.endsWith(']')) {
+                    // Store as array for later correlation with usage data
+                    if (value.includes(';')) {
+                        filamentTypeArray.push(...value.split(';').map(t => t.trim()));
+                    } else if (value.startsWith('[') && value.endsWith(']')) {
                         try {
                             const types = JSON.parse(value);
-                            fileMeta.filamentType = Array.isArray(types) ? types.join(', ') : value;
+                            if (Array.isArray(types)) {
+                                filamentTypeArray.push(...types);
+                            } else {
+                                filamentTypeArray.push(value);
+                            }
                         } catch {
-                            fileMeta.filamentType = value;
+                            filamentTypeArray.push(value);
                         }
                     } else {
-                        fileMeta.filamentType = value;
+                        filamentTypeArray.push(value);
+                    }
+                    // Don't set fileMeta.filamentType yet - will filter later
+                    break;
+                case 'filament_colour':
+                case 'filament_color':
+                    // Store color array for later correlation
+                    if (value.includes(';')) {
+                        filamentColorArray.push(...value.split(';').map(c => c.trim()));
+                    } else if (value.startsWith('[') && value.endsWith(']')) {
+                        try {
+                            const colors = JSON.parse(value);
+                            if (Array.isArray(colors)) {
+                                filamentColorArray.push(...colors);
+                            }
+                        } catch {
+                            // Ignore parse error
+                        }
                     }
                     break;
                 case 'printer_model':
@@ -165,8 +232,16 @@ export class OrcaFlashForgeParser {
      * @param line The comment line.
      * @param fileMeta The SlicerFileMeta object.
      * @param slicerMeta The SlicerMeta object.
+     * @param filamentUsedMMArray Array to store filament usage in mm.
+     * @param filamentUsedGArray Array to store filament usage in g.
      */
-    private static parseAdditionalData(line: string, fileMeta: SlicerFileMeta, slicerMeta: SlicerMeta): void {
+    private static parseAdditionalData(
+        line: string,
+        fileMeta: SlicerFileMeta,
+        slicerMeta: SlicerMeta,
+        filamentUsedMMArray: number[],
+        filamentUsedGArray: number[]
+    ): void {
         const cleanedLine = line.replace(/^;\s*/, '').trim();
         const equalsIndex = cleanedLine.indexOf('=');
 
@@ -183,30 +258,52 @@ export class OrcaFlashForgeParser {
 
             switch (key) {
                 case 'filament used [mm]':
-                    if (value.startsWith('[') && value.endsWith(']')) {
+                    // Parse and store as array for later correlation
+                    if (value.includes(',')) {
+                        // Comma-separated format: "17419.29, 0.00, 0.00, 0.00"
+                        filamentUsedMMArray.push(...value.split(',')
+                            .map(v => ParserHelper.parseFloatOrDefault(v.trim())));
+                    } else if (value.startsWith('[') && value.endsWith(']')) {
                         try {
                             const values = JSON.parse(value);
-                            // Sum if multiple extruders reported
-                            fileMeta.filamentUsedMM = Array.isArray(values) ? values.reduce((sum: number, val: string) => sum + ParserHelper.parseFloatOrDefault(val), 0) : ParserHelper.parseFloatOrDefault(value);
+                            if (Array.isArray(values)) {
+                                filamentUsedMMArray.push(...values.map((v: any) =>
+                                    ParserHelper.parseFloatOrDefault(v)));
+                            } else {
+                                filamentUsedMMArray.push(ParserHelper.parseFloatOrDefault(value));
+                            }
                         } catch {
-                            fileMeta.filamentUsedMM = ParserHelper.parseFloatOrDefault(value); // Fallback
+                            filamentUsedMMArray.push(ParserHelper.parseFloatOrDefault(value));
                         }
                     } else {
-                        fileMeta.filamentUsedMM = ParserHelper.parseFloatOrDefault(value);
+                        filamentUsedMMArray.push(ParserHelper.parseFloatOrDefault(value));
                     }
+                    // Still set total for backward compatibility
+                    fileMeta.filamentUsedMM = filamentUsedMMArray.reduce((sum, val) => sum + val, 0);
                     break;
                 case 'filament used [g]':
-                    if (value.startsWith('[') && value.endsWith(']')) {
+                    // Parse and store as array for later correlation
+                    if (value.includes(',')) {
+                        // Comma-separated format: "51.95, 0.00, 0.00, 0.00"
+                        filamentUsedGArray.push(...value.split(',')
+                            .map(v => ParserHelper.parseFloatOrDefault(v.trim())));
+                    } else if (value.startsWith('[') && value.endsWith(']')) {
                         try {
                             const values = JSON.parse(value);
-                            // Sum if multiple extruders reported
-                            fileMeta.filamentUsedG = Array.isArray(values) ? values.reduce((sum: number, val: string) => sum + ParserHelper.parseFloatOrDefault(val), 0) : ParserHelper.parseFloatOrDefault(value);
+                            if (Array.isArray(values)) {
+                                filamentUsedGArray.push(...values.map((v: any) =>
+                                    ParserHelper.parseFloatOrDefault(v)));
+                            } else {
+                                filamentUsedGArray.push(ParserHelper.parseFloatOrDefault(value));
+                            }
                         } catch {
-                            fileMeta.filamentUsedG = ParserHelper.parseFloatOrDefault(value); // Fallback
+                            filamentUsedGArray.push(ParserHelper.parseFloatOrDefault(value));
                         }
                     } else {
-                        fileMeta.filamentUsedG = ParserHelper.parseFloatOrDefault(value);
+                        filamentUsedGArray.push(ParserHelper.parseFloatOrDefault(value));
                     }
+                    // Still set total for backward compatibility
+                    fileMeta.filamentUsedG = filamentUsedGArray.reduce((sum, val) => sum + val, 0);
                     break;
                 // Add other relevant keys found outside blocks
             }
