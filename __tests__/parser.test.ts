@@ -258,11 +258,20 @@ describe('Slicer File Parser', () => {
             expect(file?.filaments?.length).toBeGreaterThan(0);
 
             // Check first filament has correct structure
-            const firstFilament = file?.filaments![0];
+            const firstFilament = file?.filaments?.[0];
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+
             expect(firstFilament).toHaveProperty('id');
             expect(firstFilament).toHaveProperty('type');
+            expect(firstFilament).toHaveProperty('color');
             expect(firstFilament).toHaveProperty('usedM');
             expect(firstFilament).toHaveProperty('usedG');
+
+            // Verify color is present for .3mf file
+            expect(firstFilament.color).toBeDefined();
+            expect(firstFilament.color).not.toBeNull();
+            expect(firstFilament.color).toEqual('#C0C0C0');
         });
 
         it('should convert filament usage from mm to meters in file.filaments', () => {
@@ -343,8 +352,14 @@ describe('Slicer File Parser', () => {
                 const firstFilament = file.filaments[0];
                 expect(firstFilament).toHaveProperty('id');
                 expect(firstFilament).toHaveProperty('type');
+                expect(firstFilament).toHaveProperty('color');
                 expect(firstFilament).toHaveProperty('usedM');
                 expect(firstFilament).toHaveProperty('usedG');
+
+                // Verify color is present for .gcode file
+                expect(firstFilament.color).toBeDefined();
+                expect(firstFilament.color).not.toBeNull();
+                expect(firstFilament.color).toEqual('#C0C0C0');
 
                 // Verify unit conversion: usedM should be in meters
                 if (file.filamentUsedMM > 0) {
@@ -418,6 +433,11 @@ describe('Slicer File Parser', () => {
             expect(firstFilament).toBeDefined();
             if (!firstFilament) return;
             expect(firstFilament.type).toEqual('PLA');
+
+            // Verify color is present for .3mf file
+            expect(firstFilament.color).toBeDefined();
+            expect(firstFilament.color).not.toBeNull();
+            expect(firstFilament.color).toEqual('#000000');
         });
 
         it('should filter threeMf.filaments array to show only used filaments', () => {
@@ -431,6 +451,11 @@ describe('Slicer File Parser', () => {
             expect(firstFilament).toBeDefined();
             if (!firstFilament) return;
             expect(firstFilament.type).toEqual('PLA');
+
+            // Verify color is present for .3mf file
+            expect(firstFilament.color).toBeDefined();
+            expect(firstFilament.color).not.toBeNull();
+            expect(firstFilament.color).toEqual('#000000');
         });
 
         it('should have consistent filament data between file and threeMf', () => {
