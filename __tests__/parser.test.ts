@@ -250,6 +250,34 @@ describe('Slicer File Parser', () => {
             expect(file?.filamentUsedG).toEqual(3.64);
         });
 
+        it('should populate file.filaments array from embedded g-code', () => {
+            const file = threeMfResult.file;
+            expect(file).toBeDefined();
+            expect(file?.filaments).toBeDefined();
+            expect(Array.isArray(file?.filaments)).toBe(true);
+            expect(file?.filaments?.length).toBeGreaterThan(0);
+
+            // Check first filament has correct structure
+            const firstFilament = file?.filaments![0];
+            expect(firstFilament).toHaveProperty('id');
+            expect(firstFilament).toHaveProperty('type');
+            expect(firstFilament).toHaveProperty('usedM');
+            expect(firstFilament).toHaveProperty('usedG');
+        });
+
+        it('should convert filament usage from mm to meters in file.filaments', () => {
+            const file = threeMfResult.file;
+            const firstFilament = file?.filaments?.[0];
+
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+
+            // usedM should be in meters (not millimeters)
+            // If filamentUsedMM is 1219.86mm, usedM should be ~1.22m
+            const expectedMeters = (file?.filamentUsedMM! / 1000).toFixed(2);
+            expect(firstFilament.usedM).toEqual(expectedMeters);
+        });
+
         it('should detect & parse the embedded thumbnail', () => {
             const file = threeMfResult.file;
             expect(file).toBeDefined();
@@ -304,6 +332,39 @@ describe('Slicer File Parser', () => {
             expect(typeof file?.filamentUsedG).toBe('number');
         });
 
+        it('should populate file.filaments array for .gcode files', () => {
+            const file = orcaGcodeResult.file;
+            expect(file).toBeDefined();
+            expect(file?.filaments).toBeDefined();
+            expect(Array.isArray(file?.filaments)).toBe(true);
+
+            // Should have at least one filament
+            if (file?.filaments && file.filaments.length > 0) {
+                const firstFilament = file.filaments[0];
+                expect(firstFilament).toHaveProperty('id');
+                expect(firstFilament).toHaveProperty('type');
+                expect(firstFilament).toHaveProperty('usedM');
+                expect(firstFilament).toHaveProperty('usedG');
+
+                // Verify unit conversion: usedM should be in meters
+                if (file.filamentUsedMM > 0) {
+                    const expectedMeters = (file.filamentUsedMM / 1000).toFixed(2);
+                    expect(firstFilament.usedM).toEqual(expectedMeters);
+                }
+            }
+        });
+
+        it('should filter file.filaments to only show used materials', () => {
+            const file = orcaGcodeResult.file;
+
+            // All filaments in the array should have non-zero usage
+            file?.filaments?.forEach(filament => {
+                const usedM = parseFloat(filament.usedM || '0');
+                const usedG = parseFloat(filament.usedG || '0');
+                expect(usedM > 0 || usedG > 0).toBe(true);
+            });
+        });
+
         it('should detect and extract thumbnail', () => {
             const file = orcaGcodeResult.file;
             expect(file).toBeDefined();
@@ -311,6 +372,110 @@ describe('Slicer File Parser', () => {
             if (file?.thumbnail) {
                 expect(file.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
             }
+        });
+    });
+
+    describe('Filament Filtering Bug Fix (test-file.3mf)', () => {
+        const bugTestFilePath = path.join(__dirname, '..', 'test-file.3mf');
+        let bugTestResult: Awaited<ReturnType<typeof parseSlicerFile>>;
+
+        beforeAll(async () => {
+            // Skip if test file doesn't exist
+            if (fs.existsSync(bugTestFilePath)) {
+                bugTestResult = await parseSlicerFile(bugTestFilePath);
+            }
+        });
+
+        it('should parse file with multiple configured filaments but only one used', async () => {
+            if (!fs.existsSync(bugTestFilePath)) {
+                console.warn('Skipping filament filtering test - test-file.3mf not found');
+                return;
+            }
+
+            expect(bugTestResult).toBeDefined();
+            expect(bugTestResult.threeMf).not.toBeNull();
+        });
+
+        it('should filter file.filamentType to show only used filaments', () => {
+            if (!fs.existsSync(bugTestFilePath)) return;
+
+            const file = bugTestResult.file;
+            expect(file).toBeDefined();
+
+            // Should be "PLA", not "PLA;PETG;PETG;PETG"
+            expect(file?.filamentType).toEqual('PLA');
+            expect(file?.filamentType).not.toContain('PETG');
+        });
+
+        it('should filter file.filaments array to show only used filaments', () => {
+            if (!fs.existsSync(bugTestFilePath)) return;
+
+            const file = bugTestResult.file;
+            expect(file?.filaments).toBeDefined();
+            expect(file?.filaments?.length).toEqual(1);
+
+            const firstFilament = file?.filaments?.[0];
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+            expect(firstFilament.type).toEqual('PLA');
+        });
+
+        it('should filter threeMf.filaments array to show only used filaments', () => {
+            if (!fs.existsSync(bugTestFilePath)) return;
+
+            const threeMf = bugTestResult.threeMf;
+            expect(threeMf?.filaments).toBeDefined();
+            expect(threeMf?.filaments?.length).toEqual(1);
+
+            const firstFilament = threeMf?.filaments?.[0];
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+            expect(firstFilament.type).toEqual('PLA');
+        });
+
+        it('should have consistent filament data between file and threeMf', () => {
+            if (!fs.existsSync(bugTestFilePath)) return;
+
+            const file = bugTestResult.file;
+            const threeMf = bugTestResult.threeMf;
+
+            // Both should report 1 filament
+            expect(file?.filaments?.length).toEqual(threeMf?.filaments?.length);
+
+            // Material type should match
+            const fileFilament = file?.filaments?.[0];
+            const threeMfFilament = threeMf?.filaments?.[0];
+            expect(fileFilament).toBeDefined();
+            expect(threeMfFilament).toBeDefined();
+            if (!fileFilament || !threeMfFilament) return;
+
+            expect(fileFilament.type).toEqual(threeMfFilament.type);
+        });
+
+        it('should convert units correctly in both file and threeMf filaments', () => {
+            if (!fs.existsSync(bugTestFilePath)) return;
+
+            const file = bugTestResult.file;
+            const threeMf = bugTestResult.threeMf;
+
+            const fileFilament = file?.filaments?.[0];
+            const threeMfFilament = threeMf?.filaments?.[0];
+            expect(fileFilament).toBeDefined();
+            expect(threeMfFilament).toBeDefined();
+            if (!fileFilament || !threeMfFilament) return;
+
+            // file.filaments should show meters (converted from mm)
+            const fileUsedM = parseFloat(fileFilament.usedM || '0');
+            expect(fileUsedM).toBeGreaterThan(0);
+            expect(fileUsedM).toBeLessThan(100); // Should be in meters, not mm
+
+            // threeMf.filaments should also show meters
+            const threeMfUsedM = parseFloat(threeMfFilament.usedM || '0');
+            expect(threeMfUsedM).toBeGreaterThan(0);
+            expect(threeMfUsedM).toBeLessThan(100); // Should be in meters, not mm
+
+            // Values should be similar (within 1 meter due to rounding)
+            expect(Math.abs(fileUsedM - threeMfUsedM)).toBeLessThan(1);
         });
     });
 
