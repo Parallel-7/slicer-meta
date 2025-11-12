@@ -217,6 +217,9 @@ export class OrcaFlashForgeParser {
                         } catch {
                             // Ignore parse error
                         }
+                    } else {
+                        // Single color value
+                        filamentColorArray.push(value);
                     }
                     break;
                 case 'printer_model':
