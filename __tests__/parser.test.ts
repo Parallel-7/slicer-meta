@@ -873,6 +873,206 @@ describe('Slicer File Parser', () => {
         });
     });
 
+    describe('Orca-FlashForge PLA and SILK Multi-Material (.gcode)', () => {
+        const orcaFFPLAandSILKGcodePath = path.join(fixturesDir, 'OrcaFF_PLA_and_SILK.gcode');
+        let result: Awaited<ReturnType<typeof parseSlicerFile>>;
+
+        beforeAll(async () => {
+            result = await parseSlicerFile(orcaFFPLAandSILKGcodePath);
+        });
+
+        it('should parse the file without error', () => {
+            expect(result).toBeDefined();
+        });
+
+        it('should work with parseSlicerFile', () => {
+            expect(result).toHaveProperty('slicer');
+            expect(result).toHaveProperty('file');
+            expect(result).toHaveProperty('threeMf');
+            expect(result.threeMf).toBeNull();
+            expect(result.slicer).toBeDefined();
+            expect(result.file).toBeDefined();
+        });
+
+        it('should parse slicer metadata', () => {
+            const slicer = result.slicer;
+            expect(slicer).toBeDefined();
+            expect(slicer?.slicer).toBe(SlicerType.OrcaFF);
+            expect(slicer?.slicerName).toEqual('Orca-Flashforge');
+        });
+
+        it('should parse file metadata with multiple material types', () => {
+            const file = result.file;
+            expect(file).toBeDefined();
+            expect(file?.filamentType).toEqual('PLA;SILK');
+            expect(file?.filamentUsedMM).toEqual(6266.79);
+            expect(file?.filamentUsedG).toEqual(18.69);
+        });
+
+        it('should parse both filaments correctly (2 materials used)', () => {
+            const file = result.file;
+            expect(file?.filaments).toBeDefined();
+            expect(file?.filaments).toHaveLength(2);
+        });
+
+        it('should have correct first filament properties (PLA)', () => {
+            const file = result.file;
+            const firstFilament = file?.filaments?.[0];
+
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+
+            expect(firstFilament.id).toEqual('0');
+            expect(firstFilament.type).toEqual('PLA');
+            expect(firstFilament.color).toEqual('#808000');
+            expect(firstFilament.usedM).toEqual('3.17');
+            expect(firstFilament.usedG).toEqual('9.46');
+        });
+
+        it('should have correct second filament properties (SILK)', () => {
+            const file = result.file;
+            const secondFilament = file?.filaments?.[1];
+
+            expect(secondFilament).toBeDefined();
+            if (!secondFilament) return;
+
+            expect(secondFilament.id).toEqual('1');
+            expect(secondFilament.type).toEqual('SILK');
+            expect(secondFilament.color).toEqual('#00C1AE');
+            expect(secondFilament.usedM).toEqual('3.10');
+            expect(secondFilament.usedG).toEqual('9.23');
+        });
+
+        it('should convert filament usage from mm to meters', () => {
+            const file = result.file;
+            const firstFilament = file?.filaments?.[0];
+            const secondFilament = file?.filaments?.[1];
+
+            expect(firstFilament).toBeDefined();
+            expect(secondFilament).toBeDefined();
+            if (!firstFilament || !secondFilament) return;
+
+            // Check both filaments have meters in reasonable range
+            expect(parseFloat(firstFilament.usedM || '0')).toBeGreaterThan(0);
+            expect(parseFloat(firstFilament.usedM || '0')).toBeLessThan(10);
+            expect(parseFloat(secondFilament.usedM || '0')).toBeGreaterThan(0);
+            expect(parseFloat(secondFilament.usedM || '0')).toBeLessThan(10);
+        });
+
+        it('should detect and extract thumbnail', () => {
+            const file = result.file;
+            if (file?.thumbnail) {
+                expect(file.thumbnail).toEqual(expect.stringContaining('data:image/png;base64,'));
+            }
+        });
+    });
+
+    describe('Orca-FlashForge PLA and SILK Multi-Material (.3mf)', () => {
+        const orcaFFPLAandSILK3mfPath = path.join(fixturesDir, 'OrcaFF_PLA_and_SILK.gcode.3mf');
+        let result: Awaited<ReturnType<typeof parseSlicerFile>>;
+
+        beforeAll(async () => {
+            result = await parseSlicerFile(orcaFFPLAandSILK3mfPath);
+        });
+
+        it('should parse the file without error', () => {
+            expect(result).toBeDefined();
+        });
+
+        it('should work with parseSlicerFile', () => {
+            expect(result).toHaveProperty('slicer');
+            expect(result).toHaveProperty('file');
+            expect(result).toHaveProperty('threeMf');
+            expect(result.threeMf).not.toBeNull();
+        });
+
+        it('should parse file metadata with multiple material types', () => {
+            const file = result.file;
+            expect(file).toBeDefined();
+            expect(file?.filamentType).toEqual('PLA;SILK');
+            expect(file?.filamentUsedMM).toEqual(6266.79);
+            expect(file?.filamentUsedG).toEqual(18.69);
+        });
+
+        it('should parse both filaments correctly in file.filaments (2 materials used)', () => {
+            const file = result.file;
+            expect(file?.filaments).toBeDefined();
+            expect(file?.filaments).toHaveLength(2);
+        });
+
+        it('should have correct file.filaments first filament properties (PLA)', () => {
+            const file = result.file;
+            const firstFilament = file?.filaments?.[0];
+
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+
+            expect(firstFilament.type).toEqual('PLA');
+            expect(firstFilament.color).toEqual('#808000');
+            expect(firstFilament.usedM).toEqual('3.17');
+            expect(firstFilament.usedG).toEqual('9.46');
+        });
+
+        it('should have correct file.filaments second filament properties (SILK)', () => {
+            const file = result.file;
+            const secondFilament = file?.filaments?.[1];
+
+            expect(secondFilament).toBeDefined();
+            if (!secondFilament) return;
+
+            expect(secondFilament.type).toEqual('SILK');
+            expect(secondFilament.color).toEqual('#00C1AE');
+            expect(secondFilament.usedM).toEqual('3.10');
+            expect(secondFilament.usedG).toEqual('9.23');
+        });
+
+        it('should parse the embedded thumbnail', () => {
+            const threeMf = result.threeMf;
+            expect(threeMf).toBeDefined();
+            expect(threeMf?.plateImage).toEqual(expect.stringContaining('data:image/png;base64,'));
+        });
+
+        it('should parse both filaments correctly in threeMf.filaments', () => {
+            const threeMf = result.threeMf;
+            expect(threeMf?.filaments).toBeDefined();
+            expect(threeMf?.filaments).toHaveLength(2);
+        });
+
+        it('should have correct threeMf.filaments first filament properties (PLA)', () => {
+            const threeMf = result.threeMf;
+            const firstFilament = threeMf?.filaments?.[0];
+
+            expect(firstFilament).toBeDefined();
+            if (!firstFilament) return;
+
+            expect(firstFilament.type).toEqual('PLA');
+            expect(firstFilament.color).toEqual('#808000');
+            expect(firstFilament.usedM).toEqual('3.17');
+            expect(firstFilament.usedG).toEqual('9.46');
+        });
+
+        it('should have correct threeMf.filaments second filament properties (SILK)', () => {
+            const threeMf = result.threeMf;
+            const secondFilament = threeMf?.filaments?.[1];
+
+            expect(secondFilament).toBeDefined();
+            if (!secondFilament) return;
+
+            expect(secondFilament.type).toEqual('SILK');
+            expect(secondFilament.color).toEqual('#00C1AE');
+            expect(secondFilament.usedM).toEqual('3.1');
+            expect(secondFilament.usedG).toEqual('9.23');
+        });
+
+        it('should have consistent filament count between file and threeMf', () => {
+            const file = result.file;
+            const threeMf = result.threeMf;
+
+            expect(file?.filaments?.length).toEqual(2);
+            expect(threeMf?.filaments?.length).toEqual(2);
+        });
+    });
+
     describe('Filament Filtering Bug Fix (test-file.3mf)', () => {
         const bugTestFilePath = path.join(__dirname, '..', 'test-file.3mf');
         let bugTestResult: Awaited<ReturnType<typeof parseSlicerFile>>;
