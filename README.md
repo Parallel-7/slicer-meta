@@ -1,35 +1,129 @@
+<div align="center">
+
 # Slicer Meta Parser
 
-A TypeScript library for parsing metadata from 3D printing slicer files. This library extracts key information from G-Code, GX, and 3MF files, such as slicer information, print settings, and filament usage.
+A TypeScript library for parsing metadata from 3D printing slicer files
 
-## Features
+[![npm version](https://img.shields.io/badge/npm-1.1.0-blue.svg)](https://www.npmjs.com/package/@parallel-7/slicer-meta)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-Private-red.svg)](https://github.com/Parallel-7/slicer-meta)
 
-- Parses metadata from various slicer file formats.
-- Supports G-Code, GX, and 3MF files.
-- Automatically detects the file type based on the extension.
-- Provides a simple, unified interface for different file types.
+</div>
+
+---
+
+<div align="center">
+
+## Supported File Formats
+
+</div>
+
+<div align="center">
+
+| File Format | Extension | Description |
+|------------|-----------|-------------|
+| G-Code | `.gcode`, `.g` | Standard G-Code files from various slicers |
+| GX Binary | `.gx` | FlashForge binary format with embedded thumbnails |
+| 3MF Archive | `.3mf` | ZIP-based 3D manufacturing format with metadata |
+
+</div>
+
+<div align="center">
+
+## Supported Slicers
+
+</div>
+
+<div align="center">
+
+| Slicer | Detection | Metadata Support |
+|--------|-----------|------------------|
+| FlashPrint | Header-based | Full support for printer model, filament type, timestamps |
+| Orca-FlashForge | Header-based | Advanced metadata including detailed filament tracking |
+| OrcaSlicer | Header-based | Block-based metadata with Base64 thumbnails |
+| Legacy GX | Format-based | Binary format with embedded G-Code parsing |
+
+</div>
+
+<div align="center">
+
+## Feature Coverage
+
+</div>
+
+<div align="center">
+
+| Feature | G-Code | GX Binary | 3MF Archive |
+|---------|--------|-----------|-------------|
+| Slicer Detection | Yes | Yes | Yes |
+| Version & Timestamp | Yes | Yes | Yes |
+| Print Time (ETA) | Yes | Yes | Yes |
+| Filament Usage (mm/g) | Yes | Yes | Yes |
+| Filament Type | Yes | Yes | Yes |
+| Filament Color | No | No | Yes |
+| Multiple Filaments | Limited | Limited | Yes |
+| Printer Model | Yes | Yes | Yes |
+| Thumbnail Extraction | Base64 | Binary | Base64 |
+| Support Detection | No | No | Yes |
+| Model File Names | No | No | Yes |
+| Plate Images | No | No | Yes |
+
+</div>
+
+<div align="center">
+
+## Parsing Capabilities
+
+</div>
+
+<div align="center">
+
+| Capability | Description |
+|------------|-------------|
+| Auto-Detection | Automatically detects file type based on extension |
+| Universal Interface | Single function handles all supported formats |
+| Slicer Identification | Determines slicer type from file headers |
+| Metadata Extraction | Parses comments and embedded metadata blocks |
+| Thumbnail Processing | Extracts and decodes Base64 encoded images |
+| Unit Conversion | Converts filament usage to meters automatically |
+| Filtered Results | Shows only filaments actually used in print |
+| Binary Parsing | Handles GX binary format with embedded G-Code |
+| Archive Processing | Unzips and parses 3MF container structure |
+
+</div>
+
+---
+
+<div align="center">
 
 ## Installation
 
-To install this package, you need to configure npm to use the GitHub Packages registry.
+</div>
 
-Add the following to a `.npmrc` file in your project's root directory:
+Configure npm to use the GitHub Packages registry by adding the following to a `.npmrc` file in your project root:
 
 ```
 @parallel-7:registry=https://npm.pkg.github.com/
 ```
 
-Then, install the package as usual:
+Install the package:
 
 ```bash
 npm install @parallel-7/slicer-meta
 ```
 
-You will need to authenticate with GitHub Packages to download private packages.
+> You will need to authenticate with GitHub Packages to download private packages.
 
-## Usage
+---
 
-The primary way to use the library is with the `parseSlicerFile` function, which automatically handles different file formats.
+<div align="center">
+
+## Basic Usage
+
+</div>
+
+The primary method for parsing slicer files is the `parseSlicerFile` function, which automatically handles all supported file formats:
 
 ```typescript
 import { parseSlicerFile } from '@parallel-7/slicer-meta';
@@ -53,23 +147,19 @@ async function main() {
 main();
 ```
 
-## Advanced Usage
+---
 
-For more specific use cases, you can use the individual parsers directly. This can be useful if you know the file type in advance or need more control over the parsing process.
+<div align="center">
 
-The following parsers are available:
+## Advanced Usage Examples
 
-- **`GCodeParser`**: A universal parser for G-code files. It automatically detects the slicer (`FlashPrint`, `Orca-FlashForge`, or `Legacy GX`) based on the file's header and delegates to the appropriate specialized parser. This is the recommended parser for most G-code files.
+</div>
 
-- **`FlashPrintParser`**: Parses G-code files generated by the **FlashPrint** slicer. It extracts basic metadata like printer model and filament type from the file's comments.
+<div align="center">
 
-- **`OrcaFlashForgeParser`**: Specifically designed for G-code files from **Orca Slicer** (particularly the FlashForge version). It handles the detailed block-based metadata format, extracting information on filament usage, print time estimates, and Base64 encoded thumbnails.
+### Parsing G-Code Files
 
-- **`GXParser`**: Handles `.gx` files, which are a binary format used by older FlashForge printers. It can extract the embedded thumbnail and parse G-code comments to determine printer model, filament type, and other metadata. It supports both native `.gx` files from FlashPrint and `.gx` files that were converted from standard G-code.
-
-- **`ThreeMfParser`**: Parses `.3mf` files, which are ZIP archives containing model, metadata, and G-code information. This parser is optimized for `.3mf` files created by **Orca Slicer** (FlashForge version). It extracts a rich set of data, including printer settings, detailed filament information (type, color, usage), model filenames, and the plate thumbnail image. It also internally uses the `GCodeParser` to analyze the embedded G-code for additional details.
-
-### Example
+</div>
 
 ```typescript
 import { GCodeParser } from '@parallel-7/slicer-meta';
@@ -80,7 +170,171 @@ async function parseGCode() {
 
   console.log('Slicer Info:', parser.slicerInfo);
   console.log('File Info:', parser.fileInfo);
+  console.log('Print ETA:', parser.slicerInfo?.printEta);
+  console.log('Filament Used:', parser.fileInfo?.filamentUsedMM, 'mm');
 }
 
 parseGCode();
 ```
+
+<div align="center">
+
+### Parsing 3MF Archives
+
+</div>
+
+```typescript
+import { ThreeMfParser } from '@parallel-7/slicer-meta';
+
+function parse3MF() {
+  const parser = new ThreeMfParser();
+  parser.parse('path/to/your/file.3mf');
+
+  console.log('Printer Model:', parser.printerModelId);
+  console.log('Support Used:', parser.supportUsed);
+  console.log('Model Files:', parser.fileNames);
+  console.log('Filaments:', parser.filaments);
+
+  if (parser.plateImage) {
+    console.log('Plate thumbnail available');
+  }
+}
+
+parse3MF();
+```
+
+<div align="center">
+
+### Parsing GX Binary Files
+
+</div>
+
+```typescript
+import { GXParser } from '@parallel-7/slicer-meta';
+
+async function parseGX() {
+  const parser = new GXParser();
+  await parser.parse('path/to/your/file.gx');
+
+  console.log('Printer Model:', parser.fileInfo?.printerModel);
+  console.log('Filament Type:', parser.fileInfo?.filamentType);
+
+  if (parser.fileInfo?.thumbnail) {
+    console.log('Thumbnail extracted from binary format');
+  }
+}
+
+parseGX();
+```
+
+<div align="center">
+
+### Working with Multiple Filaments
+
+</div>
+
+```typescript
+import { parseSlicerFile } from '@parallel-7/slicer-meta';
+
+async function analyzeFilaments() {
+  const metadata = await parseSlicerFile('path/to/multi-filament.3mf');
+
+  if (metadata.file?.filaments) {
+    metadata.file.filaments.forEach((filament, index) => {
+      console.log(`Filament ${index + 1}:`);
+      console.log(`  Type: ${filament.type}`);
+      console.log(`  Color: ${filament.color}`);
+      console.log(`  Used: ${filament.usedM}m (${filament.usedG}g)`);
+    });
+  }
+}
+
+analyzeFilaments();
+```
+
+---
+
+<div align="center">
+
+## Available Parsers
+
+</div>
+
+<div align="center">
+
+| Parser | File Types | Use Case |
+|--------|-----------|----------|
+| `GCodeParser` | `.gcode`, `.g` | Universal G-Code parser with auto-detection |
+| `FlashPrintParser` | `.gcode` | FlashPrint-specific G-Code files |
+| `OrcaFlashForgeParser` | `.gcode` | Orca Slicer / Orca-FlashForge files |
+| `GXParser` | `.gx` | FlashForge binary format files |
+| `ThreeMfParser` | `.3mf` | 3MF archive files (optimized for Orca Slicer) |
+
+</div>
+
+---
+
+<div align="center">
+
+## Return Data Structure
+
+</div>
+
+<div align="center">
+
+### Slicer Metadata
+
+</div>
+
+<div align="center">
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `slicerName` | `string` | Name of the slicer software |
+| `slicerVersion` | `string` | Version of the slicer |
+| `sliceDate` | `string` | Date when file was sliced |
+| `sliceTime` | `string` | Time when file was sliced |
+| `printEta` | `string \| null` | Estimated print time |
+| `slicer` | `SlicerType` | Enum identifying slicer type |
+
+</div>
+
+<div align="center">
+
+### File Metadata
+
+</div>
+
+<div align="center">
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `thumbnail` | `string \| null` | Base64 encoded thumbnail image |
+| `filamentUsedMM` | `number` | Total filament used in millimeters |
+| `filamentUsedG` | `number` | Total filament used in grams |
+| `filamentType` | `string` | Primary filament material type |
+| `printerModel` | `string` | Target printer model |
+| `sliceSoft` | `SlicerType` | Slicer type enum |
+| `filaments` | `FilamentInfo[]` | Array of detailed filament info |
+
+</div>
+
+<div align="center">
+
+### 3MF Specific Data
+
+</div>
+
+<div align="center">
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `printerModelId` | `string` | Printer model identifier |
+| `supportUsed` | `boolean` | Whether support structures are used |
+| `fileNames` | `string[]` | Array of model file names in archive |
+| `filaments` | `FilamentInfo[]` | Detailed per-filament information |
+| `plateImage` | `string \| null` | Base64 encoded plate preview image |
+
+</div>
+
+---
