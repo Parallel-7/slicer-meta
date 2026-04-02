@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "createdAt": "2026-04-02T20:37:27.827Z",
+  "updatedAt": "2026-04-02T20:53:52.081Z",
+  "projectRoot": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta",
+  "libraryRoot": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills",
+  "lastStatus": "updated",
+  "lastSummary": "Bootstrap complete for slicer-meta TypeScript library. Installed 6 skills (typescript-best-practices, jest, vitest, biome, github-actions, best-practices) and generated 4 agents (engineer, testing, code-quality, ci-cd). Project has no prior .pi configuration.",
+  "installedSkills": [
+    {
+      "archiveId": "best-practices-aeb2297148",
+      "skillName": "best-practices",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\code-quality\\best-practices.skill",
+      "archiveRelativePath": "skills/code-quality/best-practices.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\best-practices",
+      "archiveMtimeMs": 1769975463239.265,
+      "archiveSize": 7812,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:37:27.372Z"
+    },
+    {
+      "archiveId": "biome-6fc61ac2d9",
+      "skillName": "biome",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\typescript-dev\\biome.skill",
+      "archiveRelativePath": "skills/typescript-dev/biome.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\biome",
+      "archiveMtimeMs": 1769975464991.897,
+      "archiveSize": 233376,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:37:27.814Z"
+    },
+    {
+      "archiveId": "github-actions-4751a4a5dc",
+      "skillName": "github-actions",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\devops\\github-actions.skill",
+      "archiveRelativePath": "skills/devops/github-actions.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\github-actions",
+      "archiveMtimeMs": 1769985502078.0896,
+      "archiveSize": 531023,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:37:27.672Z"
+    },
+    {
+      "archiveId": "jest-76c3a58262",
+      "skillName": "jest",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\testing\\jest.skill",
+      "archiveRelativePath": "skills/testing/jest.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\jest",
+      "archiveMtimeMs": 1769975464935.0344,
+      "archiveSize": 151457,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:37:27.739Z"
+    },
+    {
+      "archiveId": "typescript-best-practices-457f6d66e9",
+      "skillName": "typescript-best-practices",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\typescript-dev\\typescript-best-practices.skill",
+      "archiveRelativePath": "skills/typescript-dev/typescript-best-practices.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\typescript-best-practices",
+      "archiveMtimeMs": 1769975465280.4744,
+      "archiveSize": 13152,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:37:27.827Z"
+    },
+    {
+      "archiveId": "vitest-e3c15ab6ba",
+      "skillName": "vitest",
+      "archivePath": "C:\\Users\\Coper\\Documents\\GitHub\\agent-skills\\skills\\testing\\vitest.skill",
+      "archiveRelativePath": "skills/testing/vitest.skill",
+      "installedPath": "C:\\Users\\coper\\Documents\\GitHub\\slicer-meta\\.pi\\skills\\vitest",
+      "archiveMtimeMs": 1769974382353.6736,
+      "archiveSize": 354964,
+      "rootSkillPath": "SKILL.md",
+      "source": "library",
+      "installedAt": "2026-04-02T20:49:56.167Z"
+    }
+  ],
+  "generatedAgents": [
+    {
+      "name": "ci-cd",
+      "path": ".pi/agents/ci-cd.md",
+      "generatedAt": "2026-04-02T20:53:52.081Z",
+      "skills": [
+        "github-actions"
+      ],
+      "source": "bootstrap"
+    },
+    {
+      "name": "code-quality",
+      "path": ".pi/agents/code-quality.md",
+      "generatedAt": "2026-04-02T20:53:52.081Z",
+      "skills": [
+        "biome",
+        "best-practices"
+      ],
+      "source": "bootstrap"
+    },
+    {
+      "name": "engineer",
+      "path": ".pi/agents/engineer.md",
+      "generatedAt": "2026-04-02T20:53:52.081Z",
+      "skills": [
+        "typescript-best-practices",
+        "best-practices"
+      ],
+      "source": "bootstrap"
+    },
+    {
+      "name": "testing",
+      "path": ".pi/agents/testing.md",
+      "generatedAt": "2026-04-02T20:53:52.081Z",
+      "skills": [
+        "jest",
+        "vitest"
+      ],
+      "source": "bootstrap"
+    }
+  ],
+  "migrationNotes": [],
+  "warnings": []
+}
