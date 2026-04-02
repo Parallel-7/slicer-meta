@@ -27,15 +27,15 @@ src/
     gcode/              # G-code text parser and GX binary parser
     threemf/            # 3MF archive parser (ZIP + XML)
 dist/                   # Compiled output (ES2016/CommonJS)
-__tests__/              # Jest test files (ts-jest preset)
+__tests__/              # Vitest test files
   fixtures/             # Test fixture files
 ```
 
-**Key dependencies**: `adm-zip` for 3MF archive extraction, `fast-xml-parser` for XML parsing within 3MF, `date-fns` for date handling, Jest with `ts-jest` for testing.
+**Key dependencies**: `adm-zip` for 3MF archive extraction, `fast-xml-parser` for XML parsing within 3MF, `date-fns` for date handling, Vitest for testing.
 
 **Build commands**:
 - `npm run build` — compile TypeScript to `dist/`
-- `npm test` — run Jest test suite
+- `npm test` — run Vitest test suite
 - `npm install` — install dependencies
 
 **Publishing**: Published to GitHub Packages under `@parallel-7` scope (not npmjs.com). Requires `.npmrc` with `@parallel-7:registry=https://npm.pkg.github.com/`.

@@ -21,7 +21,7 @@ You are the CI/CD pipeline engineer for slicer-meta, a TypeScript library publis
 
 This is a TypeScript library that:
 - Compiles from `src/` to `dist/` via `npm run build` (TypeScript strict mode, ES2016/CommonJS target)
-- Tests with `npm test` (Jest via ts-jest preset)
+- Tests with `npm test` (Vitest)
 - Depends on `adm-zip`, `fast-xml-parser`, and `date-fns`
 - Is published to GitHub Packages (NOT npmjs.com) under the `@parallel-7` scope
 - Requires `.npmrc` with `@parallel-7:registry=https://npm.pkg.github.com/` for installation
@@ -55,7 +55,7 @@ For every push and pull request:
 2. Setup Node.js with npm caching
 3. Run `npm ci` for clean dependency installation
 4. Run `npm run build` to compile TypeScript
-5. Run `npm test` to execute the Jest test suite
+5. Run `npm test` to execute the Vitest test suite
 
 ```yaml
 name: CI

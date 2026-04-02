@@ -11,7 +11,7 @@ TypeScript library for parsing metadata from 3D printing slicer files. Supports 
 ```bash
 npm install      # Install dependencies
 npm run build    # Compile TypeScript to dist/
-npm test         # Run Jest tests
+npm test         # Run Vitest tests
 ```
 
 No dev server, lint, or format commands are configured.
@@ -26,7 +26,7 @@ No dev server, lint, or format commands are configured.
 
 - Test files: `__tests__/**/*.test.ts`
 - Fixtures: `__tests__/fixtures/`
-- Uses ts-jest preset with Node test environment
+- Uses Vitest with Node environment
 
 ## Publishing
 
