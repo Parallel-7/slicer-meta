@@ -3,7 +3,7 @@ import { parseSlicerFile, SlicerType } from '../src';
 import { orcaGcodeFilePath, fixturesDir } from './test-utils';
 
 describe('Slicer File Parser', () => {
-  describe('Standard OrcaSlicer Parsing (regular_orca_test.gcode)', () => {
+  describe('Standard OrcaSlicer Parsing (orcaslicer_v2.3.0.gcode)', () => {
     let orcaGcodeResult: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -27,7 +27,7 @@ describe('Slicer File Parser', () => {
       const slicer = orcaGcodeResult.slicer;
       expect(slicer).toBeDefined();
 
-      // values from regular_orca_test.gcode
+      // values from orcaslicer_v2.3.0.gcode
       expect(slicer?.slicer).toBe(SlicerType.OrcaFF);
       expect(slicer?.slicerName).toEqual('OrcaSlicer');
       expect(slicer?.slicerVersion).toBeDefined();
@@ -99,7 +99,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('OrcaSlicer Two Colors One Used (.gcode)', () => {
-    const orcaTwoColorsGcodePath = fixturesDir + '/Orca_TwoColors_OneUsed.gcode';
+    const orcaTwoColorsGcodePath = fixturesDir + '/orcaslicer_v2.3.1-beta_twocolors.gcode';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -175,7 +175,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('OrcaSlicer Two Colors One Used (.3mf)', () => {
-    const orcaTwoColors3mfPath = fixturesDir + '/Orca_TwoColors_OneUsed.gcode.3mf';
+    const orcaTwoColors3mfPath = fixturesDir + '/orcaslicer_v2.3.1-beta_twocolors.3mf';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {

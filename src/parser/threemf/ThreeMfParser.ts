@@ -12,6 +12,8 @@ interface SliceInfoConfig {
             metadata?: MetadataEntry[] | MetadataEntry;
             object?: ObjectEntry[] | ObjectEntry;
             filament?: FilamentEntry[] | FilamentEntry;
+            warning?: WarningEntry[] | WarningEntry;
+            layer_filament_lists?: any;
         };
     };
 }
@@ -23,7 +25,6 @@ interface MetadataEntry {
 
 interface ObjectEntry {
     '@_name': string;
-    // other object attributes if needed
 }
 
 interface FilamentEntry {
@@ -32,12 +33,16 @@ interface FilamentEntry {
     '@_color': string;
     '@_used_m': string;
     '@_used_g': string;
-    // other filament attributes if needed
 }
 
+interface WarningEntry {
+    '@_msg': string;
+    '@_level': number;
+    '@_error_code': string;
+}
 
 /**
- * Parser for 3MF files, tested with Orca-FlashForge output.
+ * Parser for 3MF files, tested with Orca-FlashForge and FlashStudio output.
  * Extracts metadata from slice_info.config, plate image, and embedded G-code.
  */
 export class ThreeMfParser {
@@ -46,6 +51,8 @@ export class ThreeMfParser {
     public fileNames: string[] = [];
     public filaments: FilamentInfo[] = [];
     public plateImage: string | null = null; // Store as Base64 data URL
+    public warnings: SliceWarning[] = [];
+    public firstLayerTime: number | null = null; // Seconds
 
     // Metadata extracted from the embedded G-code file
     public slicerInfo: SlicerMeta | null = null;
@@ -53,10 +60,10 @@ export class ThreeMfParser {
 
     // XML Parser configuration
     private xmlParser = new XMLParser({
-        ignoreAttributes: false, // Keep attributes (like key="...", value="...")
-        attributeNamePrefix: "@_", // Standard prefix for attributes
-        allowBooleanAttributes: true, // Parse boolean attributes correctly
-        parseAttributeValue: true, // Try to parse numbers/booleans in attributes
+        ignoreAttributes: false,
+        attributeNamePrefix: "@_",
+        allowBooleanAttributes: true,
+        parseAttributeValue: true,
         trimValues: true,
     });
 
@@ -73,7 +80,6 @@ export class ThreeMfParser {
     public parse(filePath: string): this {
         let zip: AdmZip;
         try {
-            // Check if file exists before attempting to read
             if (!fs.existsSync(filePath)) {
                 throw new Error(`File not found: ${filePath}`);
             }
@@ -83,7 +89,7 @@ export class ThreeMfParser {
             throw new Error(`Failed to open or read 3MF file '${filePath}': ${error.message}`);
         }
 
-        const zipEntries = zip.getEntries(); // Get all entries
+        const zipEntries = zip.getEntries();
 
         // 1. Parse slice_info.config
         const configEntry = zipEntries.find((entry: { entryName: string; }) => entry.entryName === 'Metadata/slice_info.config');
@@ -99,12 +105,10 @@ export class ThreeMfParser {
                 }
             } catch (error: any) {
                 console.error("Error parsing slice_info.config:", error);
-                // Decide whether to throw or continue with partial data
                 throw new Error(`Failed to parse slice_info.config: ${error.message}`);
             }
         } else {
             console.warn("Metadata/slice_info.config not found in 3MF archive.");
-            // this shouldn't be needed for anything
         }
 
         // 2. Extract Plate Image
@@ -124,7 +128,7 @@ export class ThreeMfParser {
         const gcodeEntry = zipEntries.find((entry: { entryName: string; }) => entry.entryName.match(/^Metadata\/plate_\d+\.gcode$/));
         if (gcodeEntry) {
             try {
-                const gcodeContent = gcodeEntry.getData(); // Get as Buffer
+                const gcodeContent = gcodeEntry.getData();
                 const gcodeParser = new GCodeParser().parseFromContent(gcodeContent);
                 this.slicerInfo = gcodeParser.slicerInfo;
                 this.fileInfo = gcodeParser.fileInfo;
@@ -135,25 +139,21 @@ export class ThreeMfParser {
 
                 // Create default filament info if not provided by slice_info
                 if (this.filaments.length === 0 && this.fileInfo) {
-                    // Prefer detailed filaments array from G-code parser (if available)
                     if (this.fileInfo.filaments && this.fileInfo.filaments.length > 0) {
                         this.filaments = this.fileInfo.filaments;
                     } else if (this.fileInfo.filamentType !== "Unknown") {
-                        // Fallback to old string format
                         this.filaments.push({
-                            id: "0", // Assign a default ID
+                            id: "0",
                             type: this.fileInfo.filamentType,
-                            color: "Unknown", // G-code usually doesn't store color
+                            color: "Unknown",
                             usedM: this.fileInfo.filamentUsedMM?.toString(),
                             usedG: this.fileInfo.filamentUsedG?.toString(),
                         });
                     }
                 }
-            // catch any parsing errors
             } catch (error: any) {
                 throw new Error(`Failed to parse embedded G-code: ${error.message}`);
             }
-        // this should not be possible but
         } else {
             throw new Error("Embedded G-code is missing.");
         }
@@ -189,17 +189,23 @@ export class ThreeMfParser {
             this.supportUsed = supportUsedMeta['@_value'] === 'true' || supportUsedMeta['@_value'] === '1';
         }
 
+        // Parse first layer time (optional — added in FlashStudio, may appear in future Orca releases)
+        const firstLayerTimeMeta = metadataItems.find(m => m['@_key'] === 'first_layer_time');
+        if (firstLayerTimeMeta) {
+            const val = parseFloat(firstLayerTimeMeta['@_value']);
+            if (!isNaN(val)) {
+                this.firstLayerTime = val;
+            }
+        }
+
         // Parse Object Names
         const objectItems = ensureArray(plate.object);
         this.fileNames = objectItems.map(obj => obj['@_name']).filter(name => !!name);
 
         // Parse Filament Info
         const filamentItems = ensureArray(plate.filament);
-        //console.log("--- Parsing 3MF Filaments ---");
         this.filaments = filamentItems.map((fil, index) => {
-            // Log the raw attribute value before processing
             const rawId = fil['@_id'];
-            //console.log(`Raw filament[${index}] ID attribute (@_id):`, rawId, `(Type: ${typeof rawId})`);
 
             const filamentInfo: FilamentInfo = {
                 id: rawId?.toString(),
@@ -209,10 +215,22 @@ export class ThreeMfParser {
                 usedG: fil['@_used_g']?.toString(),
             };
 
-            //console.log(`Processed filament[${index}] info:`, filamentInfo);
             return filamentInfo;
         });
-        //console.log("--- Finished Parsing 3MF Filaments ---"); // Log end
 
+        // Parse Warnings (optional — added in FlashStudio)
+        const warningItems = ensureArray(plate.warning);
+        this.warnings = warningItems.map(w => ({
+            msg: w['@_msg'] ?? '',
+            level: w['@_level'] ?? 0,
+            errorCode: w['@_error_code'] ?? '',
+        }));
     }
+}
+
+/** A slicer warning extracted from 3MF slice_info.config */
+export interface SliceWarning {
+    msg: string;
+    level: number;
+    errorCode: string;
 }

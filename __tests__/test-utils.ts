@@ -5,11 +5,11 @@ import * as fs from 'fs';
 export const fixturesDir = path.join(__dirname, 'fixtures');
 
 // Path constants for test fixtures
-export const gcodeFilePath = path.join(fixturesDir, 'test.gcode');
-export const orcaGcodeFilePath = path.join(fixturesDir, 'regular_orca_test.gcode');
+export const gcodeFilePath = path.join(fixturesDir, 'flashprint_v2.4.4.gcode');
+export const orcaGcodeFilePath = path.join(fixturesDir, 'orcaslicer_v2.3.0.gcode');
 export const convertedGxFilePath = path.join(fixturesDir, 'converted.gx');
 export const flashPrintGxFilePath = path.join(fixturesDir, 'FlashPrint.gx');
-export const orcaFFthreeMfFilePath = path.join(fixturesDir, 'orca-flashforge.3mf');
+export const orcaFFthreeMfFilePath = path.join(fixturesDir, 'orca-flashforge_v1.3.0.3mf');
 export const nonExistentFilePath = path.join(fixturesDir, 'nonexistent.file');
 export const unsupportedFilePath = path.join(fixturesDir, 'test.txt');
 

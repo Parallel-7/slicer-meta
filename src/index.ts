@@ -4,16 +4,19 @@ import { GCodeParser } from './parser/gcode/GCodeParser';
 import { ThreeMfParser } from './parser/threemf/ThreeMfParser';
 import * as path from 'path';
 import type { FilamentInfo } from './FilamentInfo';
+import type { SliceWarning } from './parser/threemf/ThreeMfParser';
 
 
 export { SlicerType } from './SlicerType';
 export { SlicerMeta } from './SlicerMeta';
 export { SlicerFileMeta } from './SlicerFileMeta';
 export type { FilamentInfo } from './FilamentInfo';
+export type { SliceWarning } from './parser/threemf/ThreeMfParser';
 
 export { GCodeParser } from './parser/gcode/GCodeParser';
 export { FlashPrintParser } from './parser/gcode/FlashPrintParser';
 export { OrcaFlashForgeParser } from './parser/gcode/OrcaFlashForgeParser';
+export { OrcaFamilyParser } from './parser/gcode/orca-family/OrcaFamilyParser';
 export { GXParser } from './parser/gcode/GXParser';
 export { ThreeMfParser } from './parser/threemf/ThreeMfParser';
 
@@ -26,6 +29,8 @@ export interface ParseResult {
         fileNames: string[];
         filaments: FilamentInfo[];
         plateImage: string | null;
+        warnings: SliceWarning[];
+        firstLayerTime: number | null;
     } | null;
 }
 
@@ -49,6 +54,8 @@ export async function parseSlicerFile(filePath: string): Promise<ParseResult> {
                 fileNames: parser.fileNames,
                 filaments: parser.filaments,
                 plateImage: parser.plateImage,
+                warnings: parser.warnings,
+                firstLayerTime: parser.firstLayerTime,
             }
         };
     } else if (ext === '.gcode' || ext === '.g' || ext === '.gx') {

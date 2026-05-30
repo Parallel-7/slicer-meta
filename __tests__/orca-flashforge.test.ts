@@ -3,7 +3,7 @@ import { parseSlicerFile, SlicerType } from '../src';
 import { orcaFFthreeMfFilePath, fixturesDir } from './test-utils';
 
 describe('Slicer File Parser', () => {
-  describe('Orca-FlashForge 3MF Parsing (orca-flashforge.3mf)', () => {
+  describe('Orca-FlashForge 3MF Parsing (orca-flashforge_v1.3.0.3mf)', () => {
     let threeMfResult: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -25,7 +25,7 @@ describe('Slicer File Parser', () => {
       const threeMf = threeMfResult.threeMf;
       expect(threeMf).toBeDefined();
 
-      // values from orca-flashforge.3mf
+      // values from orca-flashforge_v1.3.0.3mf
       expect(threeMf?.printerModelId).toEqual('Flashforge-Adventurer-5M-Pro');
       expect(threeMf?.supportUsed).toEqual(false);
       expect(threeMf?.fileNames).toEqual(['SunluHSOrange.stl']);
@@ -120,7 +120,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge Two Colors One Used (.gcode)', () => {
-    const orcaFFTwoColorsGcodePath = fixturesDir + '/OrcaFF_TwoColors_OneUsed.gcode';
+    const orcaFFTwoColorsGcodePath = fixturesDir + '/orca-flashforge_v1.4.2_twocolors.gcode';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -196,7 +196,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge Two Colors One Used (.3mf)', () => {
-    const orcaFFTwoColors3mfPath = fixturesDir + '/OrcaFF_TwoColors_OneUsed.gcode.3mf';
+    const orcaFFTwoColors3mfPath = fixturesDir + '/orca-flashforge_v1.4.2_twocolors.3mf';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -285,7 +285,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge Three Colors One Used (.gcode)', () => {
-    const orcaFFThreeColorsGcodePath = fixturesDir + '/OrcaFF_ThreeColors_OneUsed.gcode';
+    const orcaFFThreeColorsGcodePath = fixturesDir + '/orca-flashforge_v1.4.2_threecolors.gcode';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -361,7 +361,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge Three Colors One Used (.3mf)', () => {
-    const orcaFFThreeColors3mfPath = fixturesDir + '/OrcaFF_ThreeColors_OneUsed.gcode.3mf';
+    const orcaFFThreeColors3mfPath = fixturesDir + '/orca-flashforge_v1.4.2_threecolors.3mf';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -450,7 +450,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge PLA and SILK Multi-Material (.gcode)', () => {
-    const orcaFFPLAandSILKGcodePath = fixturesDir + '/OrcaFF_PLA_and_SILK.gcode';
+    const orcaFFPLAandSILKGcodePath = fixturesDir + '/orca-flashforge_v1.4.2_pla-silk.gcode';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -546,7 +546,7 @@ describe('Slicer File Parser', () => {
   });
 
   describe('Orca-FlashForge PLA and SILK Multi-Material (.3mf)', () => {
-    const orcaFFPLAandSILK3mfPath = fixturesDir + '/OrcaFF_PLA_and_SILK.gcode.3mf';
+    const orcaFFPLAandSILK3mfPath = fixturesDir + '/orca-flashforge_v1.4.2_pla-silk.3mf';
     let result: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {

@@ -1,6 +1,7 @@
 export enum SlicerType {
-    FlashPrint = 'FlashPrint', // Legacy
-    OrcaFF = 'OrcaFF',         // Orca-FlashForge
-    LegacyGX = 'LegacyGX',     // Legacy .gx format
-    Unknown = 'Unknown'        // Others
+    FlashPrint = 'FlashPrint',     // Legacy FlashPrint/ffslicer
+    OrcaFF = 'OrcaFF',             // OrcaSlicer & Orca-FlashForge
+    FlashStudio = 'FlashStudio',   // FlashForge FlashStudio
+    LegacyGX = 'LegacyGX',         // Legacy .gx format
+    Unknown = 'Unknown'            // Others
 }

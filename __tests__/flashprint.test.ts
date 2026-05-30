@@ -7,7 +7,7 @@ import {
 } from './test-utils';
 
 describe('Slicer File Parser', () => {
-  describe('FlashPrint G-Code Parsing (test.gcode)', () => {
+  describe('FlashPrint G-Code Parsing (flashprint_v2.4.4.gcode)', () => {
     let gcodeResult: Awaited<ReturnType<typeof parseSlicerFile>>;
 
     beforeAll(async () => {
@@ -31,7 +31,7 @@ describe('Slicer File Parser', () => {
       const slicer = gcodeResult.slicer;
       expect(slicer).toBeDefined();
 
-      // values from test.gcode
+      // values from flashprint_v2.4.4.gcode
       expect(slicer?.slicer).toBe(SlicerType.FlashPrint);
       expect(slicer?.slicerName).toEqual('ffslicer');
       expect(slicer?.slicerVersion).toEqual('2.4.4');
