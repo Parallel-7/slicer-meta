@@ -187,6 +187,7 @@ describe('Slicer File Parser', () => {
       if (!firstWarning) return;
 
       expect(firstWarning.msg).toEqual('bed_temperature_too_high_than_filament');
+      expect(firstWarning.message).toContain('hot bed temperature is relatively high');
       expect(firstWarning.level).toEqual(3);
       expect(firstWarning.errorCode).toEqual('1000C001');
     });

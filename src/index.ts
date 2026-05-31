@@ -12,6 +12,7 @@ export { SlicerMeta } from './SlicerMeta';
 export { SlicerFileMeta } from './SlicerFileMeta';
 export type { FilamentInfo } from './FilamentInfo';
 export type { SliceWarning } from './parser/threemf/ThreeMfParser';
+export { translateWarning } from './parser/threemf/warning-translations';
 
 export { GCodeParser } from './parser/gcode/GCodeParser';
 export { FlashPrintParser } from './parser/gcode/FlashPrintParser';

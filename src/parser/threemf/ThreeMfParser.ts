@@ -5,6 +5,7 @@ import { SlicerMeta } from '../../SlicerMeta';
 import { SlicerFileMeta } from '../../SlicerFileMeta';
 import { FilamentInfo } from '../../FilamentInfo';
 import { GCodeParser } from '../gcode/GCodeParser';
+import { translateWarning } from './warning-translations';
 
 interface SliceInfoConfig {
     config?: {
@@ -220,17 +221,24 @@ export class ThreeMfParser {
 
         // Parse Warnings (optional — added in FlashStudio)
         const warningItems = ensureArray(plate.warning);
-        this.warnings = warningItems.map(w => ({
-            msg: w['@_msg'] ?? '',
-            level: w['@_level'] ?? 0,
-            errorCode: w['@_error_code'] ?? '',
-        }));
+        this.warnings = warningItems.map(w => {
+            const msg = w['@_msg'] ?? '';
+            return {
+                msg,
+                message: translateWarning(msg),
+                level: w['@_level'] ?? 0,
+                errorCode: w['@_error_code'] ?? '',
+            };
+        });
     }
 }
 
 /** A slicer warning extracted from 3MF slice_info.config */
 export interface SliceWarning {
+    /** Raw warning key as emitted by the slicer, e.g. `bed_temperature_too_high_than_filament`. */
     msg: string;
+    /** Human-readable translation of `msg`, suitable for display. */
+    message: string;
     level: number;
     errorCode: string;
 }
