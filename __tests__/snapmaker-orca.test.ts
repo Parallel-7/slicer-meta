@@ -69,6 +69,13 @@ describe('Slicer File Parser', () => {
       expect(firstFilament.usedG).toEqual('10.98');
     });
 
+    it('should parse print settings (layer height, infill, layer count)', () => {
+      const file = result.file;
+      expect(file?.layerHeight).toEqual(0.12);
+      expect(file?.infillDensity).toEqual(15);
+      expect(file?.layerCount).toEqual(400);
+    });
+
     it('should convert filament usage from mm to meters', () => {
       const file = result.file;
       const firstFilament = file?.filaments?.[0];
@@ -119,6 +126,13 @@ describe('Slicer File Parser', () => {
       expect(file?.filaments).toHaveLength(2);
     });
 
+    it('should parse print settings (layer height, infill, layer count)', () => {
+      const file = result.file;
+      expect(file?.layerHeight).toEqual(0.12);
+      expect(file?.infillDensity).toEqual(15);
+      expect(file?.layerCount).toEqual(28);
+    });
+
     it('should have correct per-filament properties', () => {
       const file = result.file;
       const f0 = file?.filaments?.[0];
@@ -167,6 +181,13 @@ describe('Slicer File Parser', () => {
       expect(file?.filamentType).toEqual('PLA;PLA');
       expect(file?.filamentUsedMM).toEqual(1900.33);
       expect(file?.filamentUsedG).toEqual(5.67);
+    });
+
+    it('should parse print settings from embedded g-code (layer height, infill, layer count)', () => {
+      const file = result.file;
+      expect(file?.layerHeight).toEqual(0.12);
+      expect(file?.infillDensity).toEqual(15);
+      expect(file?.layerCount).toEqual(28);
     });
 
     it('should parse 3MF metadata', () => {

@@ -9,6 +9,11 @@ export class SlicerFileMeta {
     public printerModel: string = "Unknown";
     public sliceSoft: SlicerType = SlicerType.Unknown;
 
+    // Print settings (Orca-family; parsed from gcode CONFIG_BLOCK / header)
+    public layerHeight: number | null = null;    // mm, e.g. 0.2
+    public infillDensity: number | null = null;  // percent, e.g. 15
+    public layerCount: number | null = null;     // total layer count, e.g. 240
+
     // Detailed per-filament information (filtered to show only used filaments)
     public filaments?: FilamentInfo[];
 

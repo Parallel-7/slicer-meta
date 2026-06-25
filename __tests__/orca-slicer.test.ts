@@ -47,6 +47,13 @@ describe('Slicer File Parser', () => {
       expect(typeof file?.filamentUsedG).toBe('number');
     });
 
+    it('should parse print settings (layer height, infill, layer count)', () => {
+      const file = orcaGcodeResult.file;
+      expect(file?.layerHeight).toEqual(0.2);
+      expect(file?.infillDensity).toEqual(15);
+      expect(file?.layerCount).toEqual(240);
+    });
+
     it('should populate file.filaments array for .gcode files', () => {
       const file = orcaGcodeResult.file;
       expect(file).toBeDefined();

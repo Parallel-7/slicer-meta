@@ -243,7 +243,14 @@ export class OrcaFamilyParser {
                 case 'printer_model':
                     fileMeta.printerModel = value;
                     break;
-                // Add other config keys if needed (e.g., layer_height, nozzle_diameter)
+                case 'layer_height':
+                    fileMeta.layerHeight = ParserHelper.parseFloatOrDefault(value) || null;
+                    break;
+                case 'sparse_infill_density':
+                    // Value like "15%" — strip the percent sign and parse
+                    fileMeta.infillDensity = ParserHelper.parseFloatOrDefault(value.replace('%', '')) || null;
+                    break;
+                // Add other config keys if needed (e.g., nozzle_diameter)
             }
         }
     }
@@ -323,6 +330,9 @@ export class OrcaFamilyParser {
                     }
                     // Still set total for backward compatibility
                     fileMeta.filamentUsedG = filamentUsedGArray.reduce((sum, val) => sum + val, 0);
+                    break;
+                case 'total layers count':
+                    fileMeta.layerCount = parseInt(value, 10) || null;
                     break;
                 // Add other relevant keys found outside blocks
             }
