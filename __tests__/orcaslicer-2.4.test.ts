@@ -200,5 +200,11 @@ describe('Slicer File Parser', () => {
       expect(typeof threeMf?.firstLayerTime).toBe('number');
       expect(threeMf?.firstLayerTime).toBeCloseTo(60.97, 1);
     });
+
+    it('should parse per-extruder nozzle diameters', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.nozzleDiameters).toBeDefined();
+      expect(threeMf?.nozzleDiameters).toEqual([0.4]);
+    });
   });
 });

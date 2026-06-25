@@ -32,6 +32,7 @@ export interface ParseResult {
         plateImage: string | null;
         warnings: SliceWarning[];
         firstLayerTime: number | null;
+        nozzleDiameters: number[];
     } | null;
 }
 
@@ -57,6 +58,7 @@ export async function parseSlicerFile(filePath: string): Promise<ParseResult> {
                 plateImage: parser.plateImage,
                 warnings: parser.warnings,
                 firstLayerTime: parser.firstLayerTime,
+                nozzleDiameters: parser.nozzleDiameters,
             }
         };
     } else if (ext === '.gcode' || ext === '.g' || ext === '.gx') {

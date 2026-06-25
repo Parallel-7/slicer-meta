@@ -54,6 +54,7 @@ export class ThreeMfParser {
     public plateImage: string | null = null; // Store as Base64 data URL
     public warnings: SliceWarning[] = [];
     public firstLayerTime: number | null = null; // Seconds
+    public nozzleDiameters: number[] = []; // Per-extruder nozzle diameters (mm)
 
     // Metadata extracted from the embedded G-code file
     public slicerInfo: SlicerMeta | null = null;
@@ -197,6 +198,15 @@ export class ThreeMfParser {
             if (!isNaN(val)) {
                 this.firstLayerTime = val;
             }
+        }
+
+        // Parse nozzle diameters (comma-separated per-extruder, e.g. "0.4,0.4,0.4,0.4")
+        const nozzleDiametersMeta = metadataItems.find(m => m['@_key'] === 'nozzle_diameters');
+        if (nozzleDiametersMeta) {
+            this.nozzleDiameters = String(nozzleDiametersMeta['@_value'] ?? '')
+                .split(/[, ]+/)
+                .map(v => parseFloat(v.trim()))
+                .filter(v => !isNaN(v));
         }
 
         // Parse Object Names

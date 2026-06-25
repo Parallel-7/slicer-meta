@@ -200,5 +200,91 @@ describe('Slicer File Parser', () => {
       // Value from slice_info.config: 69.373428
       expect(threeMf?.firstLayerTime).toBeCloseTo(69.37, 1);
     });
+
+    it('should parse per-extruder nozzle diameters (single extruder)', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.nozzleDiameters).toBeDefined();
+      expect(threeMf?.nozzleDiameters).toEqual([0.4]);
+    });
+  });
+
+  describe('FlashStudio Creator 5 Pro Two-Color 3MF (flashstudio_v1.7.6_creator5pro-2color.3mf)', () => {
+    const threeMfPath = fixturesDir + '/flashstudio_v1.7.6_creator5pro-2color.3mf';
+    let result: Awaited<ReturnType<typeof parseSlicerFile>>;
+
+    beforeAll(async () => {
+      result = await parseSlicerFile(threeMfPath);
+    });
+
+    it('should parse the file without error', () => {
+      expect(result).toBeDefined();
+    });
+
+    it('should detect Flash Studio from embedded g-code', () => {
+      const slicer = result.slicer;
+      expect(slicer?.slicer).toBe(SlicerType.FlashStudio);
+      expect(slicer?.slicerName).toEqual('Flash Studio');
+      expect(slicer?.slicerVersion).toEqual('1.7.6');
+      expect(slicer?.printEta).toEqual('28m18s');
+    });
+
+    it('should parse file metadata from embedded g-code', () => {
+      const file = result.file;
+      expect(file?.sliceSoft).toBe(SlicerType.FlashStudio);
+      expect(file?.printerModel).toEqual('Flashforge Creator 5 Pro');
+      expect(file?.filamentType).toEqual('PLA;PLA');
+      expect(file?.filamentUsedMM).toEqual(1792.52);
+      expect(file?.filamentUsedG).toEqual(5.35);
+      expect(file?.filaments).toHaveLength(2);
+    });
+
+    it('should parse 3MF metadata', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf).not.toBeNull();
+      expect(threeMf?.printerModelId).toEqual('Flashforge-Creator-5-Pro');
+      expect(threeMf?.supportUsed).toEqual(false);
+      expect(threeMf?.fileNames).toEqual(['Assembly']);
+    });
+
+    it('should parse filament info from slice_info.config', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.filaments).toHaveLength(2);
+
+      const f1 = threeMf?.filaments?.[0];
+      const f2 = threeMf?.filaments?.[1];
+
+      expect(f1?.id).toEqual('1');
+      expect(f1?.type).toEqual('PLA');
+      expect(f1?.color).toEqual('#FFFFFF');
+      expect(f1?.usedM).toEqual('1.24');
+      expect(f1?.usedG).toEqual('3.7');
+
+      expect(f2?.id).toEqual('2');
+      expect(f2?.type).toEqual('PLA');
+      expect(f2?.color).toEqual('#00C1AE');
+      expect(f2?.usedM).toEqual('0.55');
+      expect(f2?.usedG).toEqual('1.65');
+    });
+
+    it('should parse multi-extruder nozzle diameters (4 extruders)', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.nozzleDiameters).toBeDefined();
+      expect(threeMf?.nozzleDiameters).toEqual([0.4, 0.4, 0.4, 0.4]);
+    });
+
+    it('should parse first layer time', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.firstLayerTime).toBeDefined();
+      expect(threeMf?.firstLayerTime).toBeCloseTo(147.93, 1);
+    });
+
+    it('should parse warnings from slice_info.config', () => {
+      const threeMf = result.threeMf;
+      expect(threeMf?.warnings!.length).toBeGreaterThan(0);
+      const firstWarning = threeMf?.warnings?.[0];
+      expect(firstWarning?.msg).toEqual('bed_temperature_too_high_than_filament');
+      expect(firstWarning?.level).toEqual(3);
+      expect(firstWarning?.errorCode).toEqual('1000C001');
+    });
   });
 });
