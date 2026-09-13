@@ -4,10 +4,10 @@
 
 A TypeScript library for parsing metadata from 3D printing slicer files
 
-[![npm version](https://img.shields.io/badge/npm-1.5.2-blue.svg)](https://www.npmjs.com/package/@parallel-7/slicer-meta)
+[![npm version](https://img.shields.io/badge/npm-1.5.3-blue.svg)](https://www.npmjs.com/package/@parallel-7/slicer-meta)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-Private-red.svg)](https://github.com/Parallel-7/slicer-meta)
+[![License](https://img.shields.io/badge/license-ISC-blue.svg)](https://github.com/Parallel-7/slicer-meta/blob/main/LICENSE)
 
 </div>
 

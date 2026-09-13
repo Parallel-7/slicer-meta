@@ -1,7 +1,8 @@
 {
   "name": "@parallel-7/slicer-meta",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "",
+  "license": "ISC",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "files": [
