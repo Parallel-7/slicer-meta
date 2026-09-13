@@ -1,8 +1,11 @@
 name: Build and Publish Package
 
 on:
+  # Tags only (matching ff-5mp-api-ts): a main push used to publish a
+  # timestamped prerelease on every merge, accumulating junk versions in the
+  # registry. Cutting a release is exactly one action: push a `v*` tag.
+  # workflow_dispatch stays for deliberate off-tag prerelease builds.
   push:
-    branches: [ main ]
     tags: [ 'v*' ]
   workflow_dispatch:
 
@@ -47,9 +50,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
       
       - name: Publish to GitHub Packages
-        run: npm publish
+        run: npm publish --registry=https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm (public)
+        run: npm publish --registry=https://registry.npmjs.org/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           
       - name: Report error details if failed
         if: failure()
